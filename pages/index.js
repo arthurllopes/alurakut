@@ -3,107 +3,123 @@ import nookies from 'nookies';
 import jwt from 'jsonwebtoken';
 import MainGrid from '../src/components/MainGrid';
 import Box from '../src/components/Box';
-import {AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet} from '../src/lib/AluraKutCommons';
-import {ProfileRelationsBoxWrapper} from '../src/components/ProfileRelations';
+import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/lib/AluraKutCommons';
+import { ProfileRelationsBoxWrapper } from '../src/components/ProfileRelations';
 
-function ProfileSideBar(props){
+function ProfileSideBar(propriedades) {
   return (
     <Box as="aside">
-      <img src={`https://github.com/${props.githubUser}.png`} alt="Profile picture" style={{borderRadius: '8px'}} />
-      <p style={{ margin: '12px 0' }}>
-        <a className="boxLink" href={`https://github.com/${props.githubUser}`} target="_next">
-          @{props.githubUser}
+      <img src={`https://github.com/${propriedades.githubUser}.png`} style={{ borderRadius: '8px' }} />
+      <hr />
+
+      <p>
+        <a className="boxLink" href={`https://github.com/${propriedades.githubUser}`}>
+          @{propriedades.githubUser}
         </a>
       </p>
+      <hr />
+
       <AlurakutProfileSidebarMenuDefault />
     </Box>
   )
 }
-function ProfileRelationsBox(propriedades){
+
+function ProfileRelationsBox(propriedades) {
   return (
     <ProfileRelationsBoxWrapper>
       <h2 className="smallTitle">
         {propriedades.title} ({propriedades.items.length})
       </h2>
-     <ul>
-        { /*propriedades.items.map((item) =>{
+      <ul>
+        {/* {seguidores.map((itemAtual) => {
           return (
-            <li key={item}>
-              <a href={`/users/${item.title}`}>
-                <img src={item.image} alt="" />
-                <span>{item}</span>
+            <li key={itemAtual}>
+              <a href={`https://github.com/${itemAtual}.png`}>
+                <img src={itemAtual.image} />
+                <span>{itemAtual.title}</span>
               </a>
             </li>
           )
-        })*/}
+        })} */}
       </ul>
     </ProfileRelationsBoxWrapper>
   )
 }
 
-export default function Home() {
+export default function Home(props) {
+  const usuarioAleatorio = props.githubUser;
   const [comunidades, setComunidades] = React.useState([]);
-  const usuario = 'arthurllopes'
-  const pessoasFavoritas = ['juunegreiros', 'omariosouto', 'peas', 'marcobrunodev']
-
-  const [seguidores, setSeguidores] = React.useState([])
-  React.useEffect(function () {
+  const pessoasFavoritas = [
+    'juunegreiros',
+    'omariosouto',
+    'peas',
+    'rafaballerini',
+    'marcobrunodev',
+    'felipefialho',
+  ]
+  const [seguidores, setSeguidores] = React.useState([]);
+  React.useEffect(function() {
     fetch('https://api.github.com/users/peas/followers')
-    .then(function (r) {
-      return r.json()
+    .then(function (respostaDoServidor) {
+      return respostaDoServidor.json();
     })
-    .then(function (b) {
-      return setSeguidores(b)
+    .then(function(respostaCompleta) {
+      setSeguidores(respostaCompleta);
     })
 
-    // GRAPHQL
-    fetch('https://graphql.datocms.com/', { 
+
+    // API GraphQL
+    fetch('https://graphql.datocms.com/', {
       method: 'POST',
       headers: {
         'Authorization': '872c7414dd15a97c417a1acf32af2e',
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
       },
-      body: JSON.stringify({
-        "query": `query {
-          allCommunities {
-            id
-            title
-            imageUrl
-            creatorslug
-          }
-        }`
-      })
+      body: JSON.stringify({ "query": `query {
+        allCommunities {
+          id 
+          title
+          imageUrl
+          creatorslug
+        }
+      }` })
     })
-    .then(res => res.json())
-    .then((res) => {
-      const comunidadesVindas = res.data.allCommunities
-      setComunidades(comunidadesVindas)
+    .then((response) => response.json()) 
+    .then((respostaCompleta) => {
+      const comunidadesVindasDoDato = respostaCompleta.data.allCommunities;
+      setComunidades(comunidadesVindasDoDato)
     })
 
   }, [])
+
   return (
     <>
       <AlurakutMenu />
       <MainGrid>
+        {/* <Box style="grid-area: profileArea;"> */}
         <div className="profileArea" style={{ gridArea: 'profileArea' }}>
-          <ProfileSideBar githubUser={usuario} />
+          <ProfileSideBar githubUser={usuarioAleatorio} />
         </div>
         <div className="welcomeArea" style={{ gridArea: 'welcomeArea' }}>
           <Box>
-            <h1>Bem vindo</h1>
+            <h1 className="title">
+              Bem vindo(a) 
+            </h1>
+
             <OrkutNostalgicIconSet />
           </Box>
+
           <Box>
             <h2 className="subTitle">O que você deseja fazer?</h2>
-            <form onSubmit={e => {
+            <form onSubmit={function handleCriaComunidade(e) {
                 e.preventDefault();
                 const dadosDoForm = new FormData(e.target);
 
                 const comunidade = {
                   title: dadosDoForm.get('title'),
                   imageUrl: dadosDoForm.get('image'),
-                  creatorSlug: usuario,
+                  creatorSlug: usuarioAleatorio,
                 }
 
                 fetch('/api/comunidades', {
@@ -142,23 +158,21 @@ export default function Home() {
               </button>
             </form>
           </Box>
-
         </div>
-
         <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea' }}>
-        <ProfileRelationsBox title="Seguidores" items={seguidores} />
-        <ProfileRelationsBoxWrapper>
+          <ProfileRelationsBox title="Seguidores" items={seguidores} />
+          <ProfileRelationsBoxWrapper>
             <h2 className="smallTitle">
               Comunidades ({comunidades.length})
             </h2>
             <ul>
-              {comunidades.slice(0,6).map((item) =>{
+              {comunidades.slice(0,6).map((itemAtual) => {
                 return (
-                  <li key={item.id}>
-                    <a href={`/communidades/${item.id}`}>
-                    <img src={item.imageUrl} alt="" />
-                    <span>{item.title}</span>
-                  </a>
+                  <li key={itemAtual.id}>
+                    <a href={`/communities/${itemAtual.id}`}>
+                      <img src={itemAtual.imageUrl} />
+                      <span>{itemAtual.title}</span>
+                    </a>
                   </li>
                 )
               })}
@@ -166,15 +180,16 @@ export default function Home() {
           </ProfileRelationsBoxWrapper>
           <ProfileRelationsBoxWrapper>
             <h2 className="smallTitle">
-              Meus Amigos ({pessoasFavoritas.length})
+              Pessoas da comunidade ({pessoasFavoritas.length})
             </h2>
+
             <ul>
-              {pessoasFavoritas.slice(0,6).map((item) =>{
+              {pessoasFavoritas.slice(0,6).map((itemAtual) => {
                 return (
-                  <li key={item}>
-                    <a href={`/users/${item}`}>
-                      <img src={`https://github.com/${item}.png`} alt="" />
-                      <span>{item}</span>
+                  <li key={itemAtual}>
+                    <a href={`/users/${itemAtual}`}>
+                      <img src={`https://github.com/${itemAtual}.png`} />
+                      <span>{itemAtual}</span>
                     </a>
                   </li>
                 )
@@ -186,6 +201,8 @@ export default function Home() {
     </>
   )
 }
+
+
 export async function getServerSideProps(ctx) {
   const cookies = nookies.get(ctx);
   const token = cookies.USER_TOKEN;
