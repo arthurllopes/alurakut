@@ -1,12 +1,13 @@
 {
-  "private": true,
+  "name": "with-styled-components",
+  "version": "1.0.0",
   "scripts": {
     "dev": "next",
     "build": "next build",
     "start": "next start"
   },
   "dependencies": {
-    "datocms-client": "^3.4.11",
+    "datocms-client": "^3.4.10",
     "jsonwebtoken": "^8.5.1",
     "next": "latest",
     "nookies": "^2.5.2",
