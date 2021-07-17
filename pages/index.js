@@ -119,7 +119,7 @@ export default function Home(props) {
                 const comunidade = {
                   title: dadosDoForm.get('title'),
                   imageUrl: dadosDoForm.get('image'),
-                  creatorSlug: usuarioAleatorio,
+                  creatorslug: usuarioAleatorio,
                 }
 
                 fetch('/api/comunidades', {
